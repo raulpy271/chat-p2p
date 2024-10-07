@@ -1,0 +1,36 @@
+{
+  "name": "chat-p2p",
+  "version": "0.0.0",
+  "description": "A chat P2P",
+  "license": "MIT",
+  "homepage": "https://github.com/raulpy271/chat-p2p",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raulpy271/chat-p2p.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raulpy271/chat-p2p.git/issues"
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "dist",
+    "!dist/test",
+    "!**/*.tsbuildinfo"
+  ],
+  "dependencies": {
+    "@chainsafe/libp2p-gossipsub": "^14.1.0",
+    "@chainsafe/libp2p-noise": "^16.0.0",
+    "@chainsafe/libp2p-yamux": "^7.0.0",
+    "@libp2p/bootstrap": "^11.0.6",
+    "@libp2p/identify": "^3.0.1",
+    "@libp2p/pubsub-peer-discovery": "^11.0.0",
+    "@libp2p/tcp": "^10.0.0",
+    "libp2p": "^2.0.0",
+    "uint8arrays": "^5.1.0"
+  },
+  "devDependencies": {
+    "test-ipfs-example": "^1.1.0"
+  },
+  "private": true
+}
