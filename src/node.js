@@ -10,7 +10,9 @@ import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
 import { bootstrap } from '@libp2p/bootstrap'
+import readline from 'readline'
 
+const rl = readline.promises.createInterface(process.stdin, process.stdout)
 const createNode = async (owner) => {
   const config = {
     addresses: {
@@ -68,7 +70,8 @@ node.services.pubsub.topicValidators.set(topic, validate)
 
 await delay(1000)
 while (true) {
-  let msg = `${nodeName}: ping!`
+  let ipt = await rl.question('Digite mensagem no chat: ')
+  let msg = `${nodeName}: ${ipt}`
   await node.services.pubsub.publish(topic, uint8ArrayFromString(msg))
   await delay(3000)
 }

@@ -9,7 +9,9 @@ import { createLibp2p } from 'libp2p'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
+import readline from 'readline'
 
+const rl = readline.promises.createInterface(process.stdin, process.stdout)
 const createNode = async () => {
   const node = await createLibp2p({
     addresses: {
@@ -36,8 +38,15 @@ const createNode = async () => {
 const topic = 'chat_01'
 const nodeName = process.argv[2]
 const node = await createNode()
+var peers = []
 console.log(`Peer ${nodeName} id = ${node.peerId.toString()}`)
 console.log(`node addr: ${node.getMultiaddrs()}`)
+
+node.addEventListener('peer:discovery', (evt) => {
+  const peer = evt.detail
+  peers.push(peer)
+  console.log(`Peer ${node.peerId.toString()} discovered: ${peer.id.toString()}`)
+})
 
 // subscribe
 node.services.pubsub.addEventListener('message', (evt) => {
@@ -55,4 +64,20 @@ const validate = (msgTopic, msg) => {
 }
 
 node.services.pubsub.topicValidators.set(topic, validate)
+
+await delay(1000)
+while (true) {
+  if (peers.length > 0) {
+    let ipt = await rl.question('Digite mensagem no chat: ')
+    let msg = `${nodeName}: ${ipt}`
+    await node.services.pubsub.publish(topic, uint8ArrayFromString(msg))
+  }
+  await delay(3000)
+}
+
+async function delay (ms) {
+  await new Promise((resolve) => {
+    setTimeout(() => resolve(), ms)
+  })
+}
 
