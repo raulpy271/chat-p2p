@@ -2,11 +2,9 @@
 
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
-import readline from 'readline'
-import {delay} from './utils.js'
+import {delay, rl} from './utils.js'
 import {createNode} from './p2p.js'
 
-const rl = readline.promises.createInterface(process.stdin, process.stdout)
 const topic = 'chat_01'
 const nodeName = process.argv[2]
 const node = await createNode()
