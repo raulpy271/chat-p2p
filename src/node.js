@@ -1,40 +1,9 @@
 /* eslint-disable no-console */
 
-import { gossipsub } from '@chainsafe/libp2p-gossipsub'
-import { noise } from '@chainsafe/libp2p-noise'
-import { yamux } from '@chainsafe/libp2p-yamux'
-import { identify, identifyPush } from '@libp2p/identify'
-import { tcp } from '@libp2p/tcp'
-import { createLibp2p } from 'libp2p'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
-import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
-import { bootstrap } from '@libp2p/bootstrap'
-
-const createNode = async (owner) => {
-  const config = {
-    addresses: {
-      listen: ['/ip4/0.0.0.0/tcp/0']
-    },
-    transports: [tcp()],
-    streamMuxers: [yamux()],
-    connectionEncrypters: [noise()],
-    peerDiscovery: [
-      pubsubPeerDiscovery({
-        interval: 1000
-      })
-    ],
-    services: {
-      pubsub: gossipsub(),
-      identify: identify(),
-      identifyPush: identifyPush()
-    }
-  }
-
-  config.peerDiscovery.push(bootstrap({list: [owner]}))
-
-  return await createLibp2p(config)
-}
+import {delay, rl} from './utils.js'
+import {createNode} from './p2p.js'
 
 const topic = 'chat_01'
 const nodeName = process.argv[2]
@@ -68,14 +37,9 @@ node.services.pubsub.topicValidators.set(topic, validate)
 
 await delay(1000)
 while (true) {
-  let msg = `${nodeName}: ping!`
+  let ipt = await rl.question('Digite mensagem no chat: ')
+  let msg = `${nodeName}: ${ipt}`
   await node.services.pubsub.publish(topic, uint8ArrayFromString(msg))
   await delay(3000)
-}
-
-async function delay (ms) {
-  await new Promise((resolve) => {
-    setTimeout(() => resolve(), ms)
-  })
 }
 

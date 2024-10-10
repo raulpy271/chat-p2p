@@ -1,43 +1,22 @@
 /* eslint-disable no-console */
 
-import { gossipsub } from '@chainsafe/libp2p-gossipsub'
-import { noise } from '@chainsafe/libp2p-noise'
-import { yamux } from '@chainsafe/libp2p-yamux'
-import { identify, identifyPush } from '@libp2p/identify'
-import { tcp } from '@libp2p/tcp'
-import { createLibp2p } from 'libp2p'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
-import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
-
-const createNode = async () => {
-  const node = await createLibp2p({
-    addresses: {
-      listen: ['/ip4/0.0.0.0/tcp/0']
-    },
-    transports: [tcp()],
-    streamMuxers: [yamux()],
-    connectionEncrypters: [noise()],
-    peerDiscovery: [
-      pubsubPeerDiscovery({
-        interval: 1000
-      })
-    ],
-    services: {
-      pubsub: gossipsub(),
-      identify: identify(),
-      identifyPush: identifyPush()
-    }
-  })
-
-  return node
-}
+import {delay, rl} from './utils.js'
+import {createNode} from './p2p.js'
 
 const topic = 'chat_01'
 const nodeName = process.argv[2]
 const node = await createNode()
+var peers = []
 console.log(`Peer ${nodeName} id = ${node.peerId.toString()}`)
 console.log(`node addr: ${node.getMultiaddrs()}`)
+
+node.addEventListener('peer:discovery', (evt) => {
+  const peer = evt.detail
+  peers.push(peer)
+  console.log(`Peer ${node.peerId.toString()} discovered: ${peer.id.toString()}`)
+})
 
 // subscribe
 node.services.pubsub.addEventListener('message', (evt) => {
@@ -55,4 +34,14 @@ const validate = (msgTopic, msg) => {
 }
 
 node.services.pubsub.topicValidators.set(topic, validate)
+
+await delay(1000)
+while (true) {
+  if (peers.length > 0) {
+    let ipt = await rl.question('Digite mensagem no chat: ')
+    let msg = `${nodeName}: ${ipt}`
+    await node.services.pubsub.publish(topic, uint8ArrayFromString(msg))
+  }
+  await delay(3000)
+}
 
