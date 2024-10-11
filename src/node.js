@@ -11,9 +11,11 @@ const ownerAddr = process.argv[3]
 console.log(`Connecting to ${ownerAddr}`)
 const node = await createNode(ownerAddr)
 console.log(`Peer ${nodeName} id = ${node.peerId.toString()}`)
+var peers = []
 
 node.addEventListener('peer:discovery', (evt) => {
   const peer = evt.detail
+  peers.push(peer)
   console.log(`Peer ${node.peerId.toString()} discovered: ${peer.id.toString()}`)
 })
 
@@ -27,13 +29,24 @@ node.services.pubsub.addEventListener('message', (evt) => {
 })
 node.services.pubsub.subscribe(topic)
 
-await delay(1000 * 5)
+await delay(500 * 5)
 
 const validate = (msgTopic, msg) => {
   return 'accept'
 }
 
 node.services.pubsub.topicValidators.set(topic, validate)
+
+node.addEventListener('peer:disconnect', (evt) => {
+  const disconnectedPeer = evt.detail
+  peers = peers.filter(peer => !peer.id.equals(disconnectedPeer))
+  console.log("\n Um nó foi de base")
+})
+
+// setTimeout(async () => {
+//   console.log('Parando o nó...');
+//   await node.stop(); // Isso vai desconectar o nó de todos os peers
+// }, 10000); // O nó será parado após 10 segundos
 
 await delay(1000)
 while (true) {
@@ -42,4 +55,3 @@ while (true) {
   await node.services.pubsub.publish(topic, uint8ArrayFromString(msg))
   await delay(3000)
 }
-
