@@ -12,11 +12,27 @@ var peers = []
 console.log(`Peer ${nodeName} id = ${node.peerId.toString()}`)
 console.log(`node addr: ${node.getMultiaddrs()}`)
 
+
+
 node.addEventListener('peer:discovery', (evt) => {
   const peer = evt.detail
   peers.push(peer)
   console.log(`Peer ${node.peerId.toString()} discovered: ${peer.id.toString()}`)
 })
+
+node.addEventListener('peer:disconnect', (evt) => {
+  const disconnectedPeer = evt.detail
+  peers = peers.filter(peer => !peer.id.equals(disconnectedPeer))
+})
+
+
+
+setTimeout(async () => {
+  console.log('Parando o nó...');
+  await node.stop(); // Isso vai desconectar o nó de todos os peers
+}, 30000); // O nó será parado após 10 segundos
+
+
 
 // subscribe
 node.services.pubsub.addEventListener('message', (evt) => {
@@ -44,4 +60,3 @@ while (true) {
   }
   await delay(3000)
 }
-
