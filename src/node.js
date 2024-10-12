@@ -6,12 +6,20 @@ import {delay, rl} from './utils.js'
 import {createNode} from './p2p.js'
 import {Chat} from './chat.js'
 
+var owner
 const nodeName = process.argv[2]
 const ownerAddr = process.argv[3]
-console.log(`Connecting to ${ownerAddr}`)
+if (ownerAddr) {
+  console.log(`Connecting to ${ownerAddr}`)
+  owner = false
+} else {
+  console.log(`Criando sala`)
+  owner = true
+}
 const node = await createNode(ownerAddr)
-const chat = new Chat(nodeName, node)
+const chat = new Chat(nodeName, node, owner)
 console.log(`Peer ${nodeName} id = ${node.peerId.toString()}`)
+console.log(`node addr: ${node.getMultiaddrs()}`)
 
 node.addEventListener('peer:discovery', async (e) => await chat.discovery(e))
 node.addEventListener('peer:disconnect', async (e) => await chat.disconnect(e))
@@ -31,8 +39,10 @@ node.services.pubsub.topicValidators.set(chat.meta_topic, validate)
 
 await delay(1000)
 while (true) {
-  let ipt = await rl.question('Digite mensagem no chat: ')
-  await chat.handleInput(ipt)
+  if (chat.peers.length > 0) {
+    let ipt = await rl.question('Digite mensagem no chat: ')
+    await chat.handleInput(ipt)
+  }
   await delay(3000)
   console.log(chat.peers)
   console.log(chat.id)
