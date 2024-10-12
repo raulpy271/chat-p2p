@@ -94,6 +94,13 @@ export class Chat {
           }
         }
       }
+      if (msg.startsWith('banned:')) {
+        let bannedPeer = msg.replace('banned:', '')
+        if (bannedPeer === this.id.toString()) {
+          console.log('Peer banido')
+          process.exit()
+        }
+      }
       return
     }
     if (evt.detail.topic !== this.topic) {
@@ -101,5 +108,20 @@ export class Chat {
     }
     // Will not receive own published messages by default
     console.log(`node received: ${uint8ArrayToString(evt.detail.data)}`)
+  }
+
+  async handleInput(ipt) {
+    let msg
+    if (ipt.startsWith('/ban ')) {
+      let bannedPeer = ipt.replace('/ban ', '')
+      if (this.isOwner) {
+        msg = `banned:${bannedPeer}`
+        await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
+      } else {
+        console.log(`Somente Owner pode banir ${bannedPeer}`)
+      }
+    }
+    msg = `${this.name}: ${ipt}`
+    await this.node.services.pubsub.publish(this.topic, uint8ArrayFromString(msg))
   }
 }

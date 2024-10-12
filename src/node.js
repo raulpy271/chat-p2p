@@ -32,8 +32,7 @@ node.services.pubsub.topicValidators.set(chat.meta_topic, validate)
 await delay(1000)
 while (true) {
   let ipt = await rl.question('Digite mensagem no chat: ')
-  let msg = `${nodeName}: ${ipt}`
-  await node.services.pubsub.publish(chat.topic, uint8ArrayFromString(msg))
+  await chat.handleInput(ipt)
   await delay(3000)
   console.log(chat.peers)
   console.log(chat.id)

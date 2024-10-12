@@ -30,8 +30,7 @@ await delay(1000)
 while (true) {
   if (chat.peers.length > 0) {
     let ipt = await rl.question('Digite mensagem no chat: ')
-    let msg = `${nodeName}: ${ipt}`
-    await node.services.pubsub.publish(chat.topic, uint8ArrayFromString(msg))
+    await chat.handleInput(ipt)
   }
   await delay(3000)
   console.log(chat.peers)
