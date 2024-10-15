@@ -1,4 +1,7 @@
 
+const sendBtn = document.getElementById('send-btn')
+const textArea = document.getElementsByTagName('textarea')[0]
+
 const renderer = async () => {
   const name = await chat.name()
   const addrs = await chat.addrs()
@@ -10,5 +13,10 @@ const renderer = async () => {
     addrsDiv.innerHTML += `<p>${add}</p>`
   }
 }
+
+sendBtn.addEventListener('click', async () => {
+  await chat.msg(textArea.value)
+})
+
 
 renderer()

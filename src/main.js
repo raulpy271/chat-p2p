@@ -19,5 +19,6 @@ app.whenReady().then(() => {
   ipcMain.handle('addrs', () => {
     return chat.node.getMultiaddrs().map(ad => ad.toString())
   })
+  ipcMain.on('msg', (evt, inpt) => chat.handleInput(inpt))
   createWindow()
 })

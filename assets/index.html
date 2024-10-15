@@ -16,9 +16,22 @@
     <title>Hello from Electron renderer!</title>
   </head>
   <body>
-    <h1>Hello from Electron renderer!</h1>
-    <p id="user-profile">👋</p>
-    <div id="addrs">
+    <div>
+      <h1>Hello from Electron renderer!</h1>
+      <div class="window chat">
+        <p id="user-profile">👋</p>
+        <div class="window msgs">
+        </div>
+        <div class="window input">
+          <form>
+            <textarea name="text-msg" rows="4" cols="60">Digite uma mensagem...</textarea>
+            <button id="send-btn" type="button">Enviar!</button>
+          </form>
+        </div>
+      </div>
+      <br>
+      <div id="addrs">
+      </div>
     </div>
   </body>
   <script src="./renderer.js"></script>
