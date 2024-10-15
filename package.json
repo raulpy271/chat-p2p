@@ -12,6 +12,9 @@
     "url": "https://github.com/raulpy271/chat-p2p.git/issues"
   },
   "type": "module",
+  "scripts": {
+    "start": "electron src/main.js"
+  },
   "files": [
     "src",
     "dist",
@@ -30,6 +33,7 @@
     "uint8arrays": "^5.1.0"
   },
   "devDependencies": {
+    "electron": "^33.0.0",
     "test-ipfs-example": "^1.1.0"
   },
   "private": true

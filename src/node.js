@@ -17,7 +17,7 @@ if (ownerAddr) {
   owner = true
 }
 const node = await createNode(ownerAddr)
-const chat = new Chat(nodeName, node, owner)
+export const chat = new Chat(nodeName, node, owner)
 console.log(`Peer ${nodeName} id = ${node.peerId.toString()}`)
 console.log(`node addr: ${node.getMultiaddrs()}`)
 
@@ -37,16 +37,16 @@ const validate = (msgTopic, msg) => {
 node.services.pubsub.topicValidators.set(chat.topic, validate)
 node.services.pubsub.topicValidators.set(chat.meta_topic, validate)
 
-await delay(1000)
-while (true) {
-  if (chat.peers.length > 0) {
-    let ipt = await rl.question('Digite mensagem no chat: ')
-    await chat.handleInput(ipt)
-  }
-  await delay(3000)
-  console.log(chat.peers)
-  console.log(chat.id)
-  console.log(chat.owner)
-  console.log(chat.nextOwner)
-}
+//await delay(1000)
+//while (true) {
+//  if (chat.peers.length > 0) {
+//    let ipt = await rl.question('Digite mensagem no chat: ')
+//    await chat.handleInput(ipt)
+//  }
+//  await delay(3000)
+//  console.log(chat.peers)
+//  console.log(chat.id)
+//  console.log(chat.owner)
+//  console.log(chat.nextOwner)
+//}
 
