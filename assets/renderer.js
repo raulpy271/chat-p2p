@@ -18,5 +18,11 @@ sendBtn.addEventListener('click', async () => {
   await chat.msg(textArea.value)
 })
 
+chat.onMsgReceived((msg) => {
+  const msgWindow = document.getElementsByClassName('msgs')[0]
+  msgWindow.innerHTML += `<p class="msg">${msg}</p>`
+  console.log(`mensagem recebida: ${msg}`)
+})
+
 
 renderer()

@@ -13,6 +13,7 @@ export class Chat {
     this.id = node.peerId
     this.owner = null
     this.isOwner = false
+    this.events = {}
     this.nextOwner = null
     if (owner) {
       this.owner = this.id
@@ -40,6 +41,16 @@ export class Chat {
 
   removePeer(peerId) {
     this.peers = this.peers.filter(peer => peer['peer'].id.toString() !== peerId.toString())
+  }
+
+  addEventListener(evt, callback) {
+    this.events[evt] = callback
+  }
+
+  handleEvent(evt, value) {
+    if (this.events[evt]) {
+      this.events[evt](value)
+    }
   }
 
   async discovery(evt) {
@@ -79,8 +90,8 @@ export class Chat {
   }
 
   async message(evt) {
+    let msg = uint8ArrayToString(evt.detail.data)
     if (evt.detail.topic === this.meta_topic) {
-      let msg = uint8ArrayToString(evt.detail.data)
       if (msg.startsWith('set-next-owner:')) {
         let nextOwner = msg.replace('set-next-owner:', '')
         if (this.id.toString() === nextOwner) {
@@ -107,7 +118,8 @@ export class Chat {
       return
     }
     // Will not receive own published messages by default
-    console.log(`node received: ${uint8ArrayToString(evt.detail.data)}`)
+    console.log(`node received: ${msg}`)
+    this.handleEvent('msg-received', msg)
   }
 
   async handleInput(ipt) {

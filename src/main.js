@@ -12,6 +12,7 @@ const createWindow = () => {
     }
   })
   win.loadFile('../assets/index.html')
+  chat.addEventListener('msg-received', (msg) => win.webContents.send('msg-received', msg))
 }
 
 app.whenReady().then(() => {
