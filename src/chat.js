@@ -14,6 +14,7 @@ export class Chat {
     this.owner = null
     this.isOwner = false
     this.nextOwner = null
+    this.lenghtChat = 2
     if (owner) {
       this.owner = this.id
       this.isOwner = true
@@ -45,6 +46,7 @@ export class Chat {
   async discovery(evt) {
     const peer = evt.detail
     this.addPeer(peer)
+
     await this.node.dial(peer.id)
     if (!this.owner) {
       this.owner = this.node.getPeers()[0]
@@ -55,6 +57,12 @@ export class Chat {
       let msg = `set-next-owner:${this.nextOwner.toString()}`
       await delay(1000)
       await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
+
+      if(this.peers.length>=this.lenghtChat){
+        console.log("Chat Cheio")
+        let msg = 'chat_cheio:'+peer.id
+        await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
+      }
     }
   }
 
@@ -101,6 +109,15 @@ export class Chat {
           process.exit()
         }
       }
+      if (msg.startsWith('chat_cheio:')) {
+        let bannedPeer = msg.replace('chat_cheio:', '')
+        if (bannedPeer === this.id.toString()) {
+          console.log('Chat Cheio!')
+          process.exit()
+        }
+      }
+
+      
       return
     }
     if (evt.detail.topic !== this.topic) {
@@ -121,6 +138,11 @@ export class Chat {
         console.log(`Somente Owner pode banir ${bannedPeer}`)
       }
     }
+
+    if (ipt.startsWith('chat_cheio:')) {
+      ipt = ipt.replace('chat_cheio:', '')
+    }
+    
     msg = `${this.name}: ${ipt}`
     await this.node.services.pubsub.publish(this.topic, uint8ArrayFromString(msg))
   }
