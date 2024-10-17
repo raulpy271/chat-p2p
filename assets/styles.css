@@ -1,0 +1,27 @@
+h1 {
+  color: red
+}
+
+div.window {
+  display: block;
+  border-style: solid;
+  border-width: 3px;
+}
+
+div.chat {
+  width: 80%;
+  height: 400px;
+  margin: auto;
+}
+
+div.msgs {
+  width: 95%;
+  height: 55%;
+  margin: auto;
+}
+
+div.input {
+  width: 95%;
+  height: 26%;
+  margin: auto;
+}

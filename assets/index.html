@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+
+    <link rel="stylesheet" href="styles.css">
+    <title>Hello from Electron renderer!</title>
+  </head>
+  <body>
+    <div>
+      <h1>Hello from Electron renderer!</h1>
+      <div class="window chat">
+        <p id="user-profile">👋</p>
+        <div class="window msgs">
+        </div>
+        <div class="window input">
+          <form>
+            <textarea name="text-msg" rows="4" cols="60">Digite uma mensagem...</textarea>
+            <button id="send-btn" type="button">Enviar!</button>
+          </form>
+        </div>
+      </div>
+      <br>
+      <div id="addrs">
+      </div>
+    </div>
+  </body>
+  <script src="./renderer.js"></script>
+</html>
