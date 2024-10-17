@@ -60,7 +60,7 @@ export class Chat {
 
       if(this.peers.length>=this.lenghtChat){
         console.log("Chat Cheio")
-        let msg = 'chat_cheio:'+peer.id
+        let msg = 'chat-full:'+peer.id
         await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
       }
     }
@@ -110,8 +110,8 @@ export class Chat {
         }
       }
 
-      if (msg.startsWith('chat-cheio:')) {
-        let bannedPeer = msg.replace('chat-cheio:', '')
+      if (msg.startsWith('chat-full:')) {
+        let bannedPeer = msg.replace('chat-full:', '')
         if (bannedPeer === this.id.toString()) {
           console.log('Chat Cheio!')
           process.exit()
@@ -158,7 +158,7 @@ export class Chat {
         ipt = ""
 
         this.lenghtChat = parseInt(length)
-        console.log("Sala aumentada para "+length)
+        console.log("Tamanho da sala alterada para "+length)
         await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
       } else {
         console.log(`Somente Owner alterar o tamanho da sala!`)
@@ -170,8 +170,8 @@ export class Chat {
       ipt = ""
     }
 
-    if (ipt.startsWith('chat-cheio:')) {
-      ipt = ipt.replace('chat-cheio:', '')
+    if (ipt.startsWith('chat-full:')) {
+      ipt = ipt.replace('chat-full:', '')
     }
 
     if(ipt.length>0){
