@@ -14,7 +14,7 @@ export class Chat {
     this.owner = null
     this.isOwner = false
     this.nextOwner = null
-    this.lenghtChat = 2
+    this.lenghtChat = 10
     if (owner) {
       this.owner = this.id
       this.isOwner = true
@@ -109,20 +109,27 @@ export class Chat {
           process.exit()
         }
       }
-      if (msg.startsWith('chat_cheio:')) {
-        let bannedPeer = msg.replace('chat_cheio:', '')
+
+      if (msg.startsWith('chat-cheio:')) {
+        let bannedPeer = msg.replace('chat-cheio:', '')
         if (bannedPeer === this.id.toString()) {
           console.log('Chat Cheio!')
           process.exit()
         }
       }
 
-      
+      if (msg.startsWith('length-chat:')) {
+        let length = parseInt(msg.replace('length-chat:', ''))
+          this.lenghtChat = length
+          console.log('Tamanho da sala alterada para '+  this.lenghtChat)
+      }
+
       return
     }
     if (evt.detail.topic !== this.topic) {
       return
     }
+
     // Will not receive own published messages by default
     console.log(`node received: ${uint8ArrayToString(evt.detail.data)}`)
   }
@@ -139,11 +146,37 @@ export class Chat {
       }
     }
 
-    if (ipt.startsWith('chat_cheio:')) {
-      ipt = ipt.replace('chat_cheio:', '')
+    if (ipt.startsWith('/length-chat ')) {
+      let length = parseInt(ipt.replace('/length-chat ', ''))
+      if (this.isOwner) {
+        msg = `length-chat:${length}`
+        if(length< this.peers.length){
+          console.log("O tamanho deve ser pelo menos maior do que a quantidade de peers atual!")
+          return
+        }
+        
+        ipt = ""
+
+        this.lenghtChat = parseInt(length)
+        console.log("Sala aumentada para "+length)
+        await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
+      } else {
+        console.log(`Somente Owner alterar o tamanho da sala!`)
+      }
     }
-    
-    msg = `${this.name}: ${ipt}`
-    await this.node.services.pubsub.publish(this.topic, uint8ArrayFromString(msg))
+
+    if (ipt.startsWith('/length-chat-view')) {
+      console.log("Atamanho atual: "+this.lenghtChat)
+      ipt = ""
+    }
+
+    if (ipt.startsWith('chat-cheio:')) {
+      ipt = ipt.replace('chat-cheio:', '')
+    }
+
+    if(ipt.length>0){
+      msg = `${this.name}: ${ipt}`
+      await this.node.services.pubsub.publish(this.topic, uint8ArrayFromString(msg))
+    }
   }
 }
