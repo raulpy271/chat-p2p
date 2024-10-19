@@ -15,6 +15,7 @@ export class Chat {
     this.isOwner = false
     this.events = {}
     this.nextOwner = null
+    this.lenghtChat = 10
     if (owner) {
       this.owner = this.id
       this.isOwner = true
@@ -56,6 +57,7 @@ export class Chat {
   async discovery(evt) {
     const peer = evt.detail
     this.addPeer(peer)
+
     await this.node.dial(peer.id)
     if (!this.owner) {
       this.owner = this.node.getPeers()[0]
@@ -66,6 +68,12 @@ export class Chat {
       let msg = `set-next-owner:${this.nextOwner.toString()}`
       await delay(1000)
       await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
+
+      if(this.peers.length>=this.lenghtChat){
+        console.log("Chat Cheio")
+        let msg = 'chat-full:'+peer.id
+        await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
+      }
     }
   }
 
@@ -112,11 +120,27 @@ export class Chat {
           process.exit()
         }
       }
+
+      if (msg.startsWith('chat-full:')) {
+        let bannedPeer = msg.replace('chat-full:', '')
+        if (bannedPeer === this.id.toString()) {
+          console.log('Chat Cheio!')
+          process.exit()
+        }
+      }
+
+      if (msg.startsWith('length-chat:')) {
+        let length = parseInt(msg.replace('length-chat:', ''))
+          this.lenghtChat = length
+          console.log('Tamanho da sala alterada para '+  this.lenghtChat)
+      }
+
       return
     }
     if (evt.detail.topic !== this.topic) {
       return
     }
+
     // Will not receive own published messages by default
     console.log(`node received: ${msg}`)
     this.handleEvent('msg-received', msg)
@@ -133,7 +157,38 @@ export class Chat {
         console.log(`Somente Owner pode banir ${bannedPeer}`)
       }
     }
-    msg = `${this.name}: ${ipt}`
-    await this.node.services.pubsub.publish(this.topic, uint8ArrayFromString(msg))
+
+    if (ipt.startsWith('/length-chat ')) {
+      let length = parseInt(ipt.replace('/length-chat ', ''))
+      if (this.isOwner) {
+        msg = `length-chat:${length}`
+        if(length< this.peers.length){
+          console.log("O tamanho deve ser pelo menos maior do que a quantidade de peers atual!")
+          return
+        }
+        
+        ipt = ""
+
+        this.lenghtChat = parseInt(length)
+        console.log("Tamanho da sala alterada para "+length)
+        await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
+      } else {
+        console.log(`Somente Owner alterar o tamanho da sala!`)
+      }
+    }
+
+    if (ipt.startsWith('/length-chat-view')) {
+      console.log("Atamanho atual: "+this.lenghtChat)
+      ipt = ""
+    }
+
+    if (ipt.startsWith('chat-full:')) {
+      ipt = ipt.replace('chat-full:', '')
+    }
+
+    if(ipt.length>0){
+      msg = `${this.name}: ${ipt}`
+      await this.node.services.pubsub.publish(this.topic, uint8ArrayFromString(msg))
+    }
   }
 }
