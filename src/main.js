@@ -15,14 +15,13 @@ const createWindow = (chat) => {
   chat.addEventListener('msg-received', (msg) => win.webContents.send('msg-received', msg))
   chat.addEventListener('disconnected', (msg) => win.webContents.send('disconnected', msg))
   chat.addEventListener('peer-name-discovered', (msg) => win.webContents.send('peer-name-discovered', msg))
-  //chat.addEventListener('peer-name-discovered', (msg) => {
-  //  win.webContents.on('did-finish-load', () => win.webContents.send('peer-name-discovered', msg));
-  //})
 }
 
 app.whenReady().then(() => {
   const chat = createChat()
-  ipcMain.handle('name', () => chat.name)
+  ipcMain.handle('me', () => {
+    return {"name": chat.name, "isOwner": chat.isOwner}
+  })
   ipcMain.handle('addrs', () => {
     return chat.node.getMultiaddrs().map(ad => ad.toString())
   })

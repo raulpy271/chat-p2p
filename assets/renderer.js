@@ -6,10 +6,14 @@ const regexName = /^(.*?):/;
 const regexMsg = /: (.*)/;
 
 const renderer = async () => {
-  const name = await chat.name()
+  const me = await chat.me()
   const addrs = await chat.addrs()
   const user = document.getElementById('user-profile')
-  user.innerText = `Olá ${name}`
+  if (me["isOwner"]) {
+    user.innerText = `Olá ${me["name"]} - Admin`
+  } else {
+    user.innerText = `Olá ${me["name"]}`
+  }
   const addrsDiv = document.getElementById('addrs')
   addrsDiv.innerHTML += 'Seus endereços são:'
   for (let add of addrs) {
@@ -33,6 +37,11 @@ chat.onMsgReceived((msg) => {
 chat.onDisconnected((peer) => {
   msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer disconectado: <span>${peer["name"]}</span></p> </div>`
   console.log(`Peer disconectado ${peer["name"]}`)
+})
+
+chat.onNameDiscovered((peer) => {
+  msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer entrou na sala: <span>${peer["name"]}</span></p> </div>`
+  console.log(`Peer descoberto ${peer["name"]}`)
 })
 
 renderer()

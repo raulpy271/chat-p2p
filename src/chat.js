@@ -160,8 +160,11 @@ export class Chat {
         let name = msg.replace('peer-name:', '')
         let peer = this.findPeer(evt.detail.from)
         if (peer) {
-          peer["name"] = name
-          console.log(`Nome do nó ${peer["peer"].id.toString()}: ${name}`)
+          if (!peer["name"]) {
+            peer["name"] = name
+            console.log(`Nome do nó ${peer["peer"].id.toString()}: ${name}`)
+            this.handleEvent('peer-name-discovered', peer)
+          }
         } else {
           console.log(`Peer não encontrato: ${evt.detail.from.toString()}`)
         }
