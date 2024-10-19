@@ -91,6 +91,7 @@ export class Chat {
 
   async disconnect(evt) {
     let ownerDisconnected = false
+    let disconnectedPeer = this.findPeer(evt.detail)
     this.removePeer(evt.detail)
     if (evt.detail.toString() === this.owner.toString()) {
       ownerDisconnected = true
@@ -106,7 +107,8 @@ export class Chat {
         await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
       }
     }
-    console.log("\n Um nó foi de base " + evt.detail.toString())
+    console.log("\n Um nó foi de base " + disconnectedPeer["name"])
+    this.handleEvent('disconnected', disconnectedPeer)
   }
 
   async message(evt) {

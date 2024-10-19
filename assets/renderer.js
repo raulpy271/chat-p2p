@@ -1,6 +1,7 @@
 
 const sendBtn = document.getElementById('send-btn')
 const textArea = document.getElementsByTagName('textarea')[0]
+const msgWindow = document.getElementsByClassName('msgs')[0]
 const regexName = /^(.*?):/;
 const regexMsg = /: (.*)/;
 
@@ -25,10 +26,13 @@ chat.onMsgReceived((msg) => {
   const matchMsg = msg.match(regexMsg);
   const userName = matchUser[1]
   const message = matchMsg[1]
-  const msgWindow = document.getElementsByClassName('msgs')[0]
   msgWindow.innerHTML += `<div class="received-msg"> <p class="msg-user">${userName}: </p> <p class="msg">${message}</p> </div>`
   console.log(`mensagem recebida: ${msg}`)
 })
 
+chat.onDisconnected((peer) => {
+  msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer disconectado: <span>${peer["name"]}</span></p> </div>`
+  console.log(`Peer disconectado ${peer["name"]}`)
+})
 
 renderer()
