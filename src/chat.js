@@ -25,8 +25,18 @@ export class Chat {
   addPeer(peer) {
     this.peers.push({
       "peer": peer,
+      "name": null,
       "join_date": Date.now()
     })
+  }
+
+  findPeer(peerId) {
+    let peersFound = this.peers.filter(peer => peer['peer'].id.toString() === peerId.toString())
+    if (peersFound) {
+      return peersFound[0]
+    } else {
+      return null
+    }
   }
 
   setNextOwner() {
@@ -63,15 +73,17 @@ export class Chat {
       this.owner = this.node.getPeers()[0]
     }
     console.log(`Peer ${this.node.peerId.toString()} discovered: ${peer.id.toString()}`)
+    // Delay necessário pois a decoberta do peer não é imediata à subscrição no tópico
+    await delay(1000)
+    let msg = `peer-name:${this.name}`
+    await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
     if (this.isOwner) {
       this.setNextOwner()
-      let msg = `set-next-owner:${this.nextOwner.toString()}`
-      await delay(1000)
+      msg = `set-next-owner:${this.nextOwner.toString()}`
       await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
-
-      if(this.peers.length>=this.lenghtChat){
+      if (this.peers.length >= this.lenghtChat) {
         console.log("Chat Cheio")
-        let msg = 'chat-full:'+peer.id
+        msg = 'chat-full:'+peer.id
         await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
       }
     }
@@ -131,9 +143,21 @@ export class Chat {
 
       if (msg.startsWith('length-chat:')) {
         let length = parseInt(msg.replace('length-chat:', ''))
-          this.lenghtChat = length
-          console.log('Tamanho da sala alterada para '+  this.lenghtChat)
+        this.lenghtChat = length
+        console.log('Tamanho da sala alterada para '+  this.lenghtChat)
       }
+
+      if (msg.startsWith('peer-name:')) {
+        let name = msg.replace('peer-name:', '')
+        let peer = this.findPeer(evt.detail.from)
+        if (peer) {
+          peer["name"] = name
+          console.log(`Nome do nó ${peer["peer"].id.toString()}: ${name}`)
+        } else {
+          console.log(`Peer não encontrato: ${evt.detail.from.toString()}`)
+        }
+      }
+
 
       return
     }
