@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld('chat', {
   onMsgReceived: (callback) => ipcRenderer.on('msg-received', (evt, msg) => callback(msg)),
   onDisconnected: (callback) => ipcRenderer.on('disconnected', (evt, msg) => callback(msg)),
   onNameDiscovered: (callback) => ipcRenderer.on('peer-name-discovered', (evt, msg) => callback(msg)),
+  onOwnerChanged: (callback) => ipcRenderer.on('owner-changed', (evt, msg) => callback(msg)),
 })

@@ -105,6 +105,7 @@ export class Chat {
       console.log("O owner saiu, definindo novo nó mais velhor como owner")
       this.promoteOwner()
       console.log(`Novo owner: ${this.owner.toString()}`)
+      this.handleEvent('owner-changed', this.isOwner)
     }
     if (this.isOwner && this.peers.length > 0) {
       if (ownerDisconnected || (evt.detail.toString() === this.nextOwner.toString())) {

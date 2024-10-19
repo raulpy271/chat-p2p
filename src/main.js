@@ -15,6 +15,7 @@ const createWindow = (chat) => {
   chat.addEventListener('msg-received', (msg) => win.webContents.send('msg-received', msg))
   chat.addEventListener('disconnected', (msg) => win.webContents.send('disconnected', msg))
   chat.addEventListener('peer-name-discovered', (msg) => win.webContents.send('peer-name-discovered', msg))
+  chat.addEventListener('owner-changed', (msg) => win.webContents.send('owner-changed', msg))
 }
 
 app.whenReady().then(() => {

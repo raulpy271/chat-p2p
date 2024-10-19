@@ -1,18 +1,20 @@
 
+var name = null
 const sendBtn = document.getElementById('send-btn')
 const textArea = document.getElementsByTagName('textarea')[0]
 const msgWindow = document.getElementsByClassName('msgs')[0]
+const user = document.getElementById('user-profile')
 const regexName = /^(.*?):/;
 const regexMsg = /: (.*)/;
 
 const renderer = async () => {
   const me = await chat.me()
+  name = me["name"]
   const addrs = await chat.addrs()
-  const user = document.getElementById('user-profile')
   if (me["isOwner"]) {
-    user.innerText = `Olá ${me["name"]} - Admin`
+    user.innerText = `Olá ${name} - Admin`
   } else {
-    user.innerText = `Olá ${me["name"]}`
+    user.innerText = `Olá ${name}`
   }
   const addrsDiv = document.getElementById('addrs')
   addrsDiv.innerHTML += 'Seus endereços são:'
@@ -42,6 +44,14 @@ chat.onDisconnected((peer) => {
 chat.onNameDiscovered((peer) => {
   msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer entrou na sala: <span>${peer["name"]}</span></p> </div>`
   console.log(`Peer descoberto ${peer["name"]}`)
+})
+
+chat.onOwnerChanged((isOwner) => {
+  if (isOwner) {
+    user.innerText = `Olá ${name} - Admin`
+  } else {
+    user.innerText = `Olá ${name}`
+  }
 })
 
 renderer()
