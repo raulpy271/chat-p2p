@@ -1,23 +1,38 @@
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'sans serif';
-
+  margin: 0; /* Remove margens */
+  padding: 0; /* Remove qualquer padding */
+  box-sizing: border-box; /* Garante que padding e borda sejam incluídos nas dimensões */
+  font-family: "sans serif";
 }
 
-body{
-  background-color: rgb(66, 66, 66);
+body {
+  background-size: cover;
+  background-position: center;
   width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden; /* Garante que o pseudo-elemento não transborde */
 }
 
+body::before {
+  content: "";
+  position: absolute;
+  top: -10px; /* Faz com que o fundo seja ligeiramente maior que a tela */
+  left: -10px;
+  width: calc(100vw + 20px); /* Aumenta o tamanho horizontal */
+  height: calc(100vh + 20px); /* Aumenta o tamanho vertical */
+  background-image: url("./background.jpg");
+  background-size: cover;
+  background-position: center;
+  filter: blur(15px);
+  z-index: -1;
+}
 
-div.title{
+div.title {
   font-size: 32px;
   font-weight: bold;
   color: #d1cece;
@@ -26,7 +41,7 @@ div.title{
   margin-top: 50px;
 }
 
-div.user-profile{
+div.user-profile {
   display: flex;
   width: 100%;
   justify-content: center;
@@ -34,12 +49,12 @@ div.user-profile{
   padding: 30px;
 }
 
-p.user-name{
+p.user-name {
   font-size: 16px;
   color: #d1cece;
 }
 
-div.window-chat{
+div.window-chat {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -52,25 +67,25 @@ div.window-msgs {
   border-radius: 20px 20px 0 0;
   height: 50vh;
   width: 70%;
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5);
+  border: 1px solid  #d1cece;
   padding: 20px;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-
 div.received-msg {
   color: #c4c4c4;
+  display: flex;
+  align-items: center;
   font-size: 16px;
   margin-bottom: 10px;
-  border: 1px solid #d1cece46;
   width: auto;
   height: auto;
   max-width: 100%;
   padding: 5px 10px;
   border-radius: 20px;
   overflow-wrap: break-word;
-  word-break: break-all; 
+  word-break: break-all;
   white-space: normal;
 }
 div.window-msgs::-webkit-scrollbar {
@@ -95,40 +110,45 @@ div.window-msgs {
   scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
 }
 
-
-
-p.msg-user{
+p.msg-user {
   padding-right: 10px;
   color: #d1cece;
   font-weight: bold;
+  white-space: nowrap;
 }
 
-form{
+p.msg {
+  border: 1px solid #d1cece1c;
+  border-radius: 20px;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  white-space: normal;
+  padding: 5px 10px;
+}
+
+form {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-
 }
 
-textarea{
+textarea {
   width: 70%;
+  min-width: 70%;
   max-width: 70%;
   margin: 0;
   padding: 0;
   border-radius: 0 0 20px 20px;
   padding: 10px;
   background-color: transparent;
-  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5);
+  border: 1px solid  #d1cece;
   color: #d1cece;
-  border: none;
   outline: none;
   font-size: 16px;
-
 }
 
-
-button{
+button {
   width: 100px;
   height: 30px;
   margin-top: 10px;
@@ -141,6 +161,8 @@ button{
   font-size: 14px;
 }
 
-div.addrs{
+div.addrs {
   font-size: 14px;
+  color: #c4c4c4;
+  margin-bottom: 30px;
 }
