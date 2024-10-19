@@ -4,21 +4,28 @@ import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { delay } from './utils.js'
 
 export class Chat {
-  constructor(name, node, owner) {
+  constructor(name, owner) {
     this.topic = 'chat_01'
     this.meta_topic = 'meta_topic'
     this.peers = []
     this.name = name
-    this.node = node
-    this.id = node.peerId
+    this.node = null
+    this.id = null
     this.owner = null
     this.isOwner = false
     this.events = {}
     this.nextOwner = null
     this.lenghtChat = 10
     if (owner) {
-      this.owner = this.id
       this.isOwner = true
+    }
+  }
+
+  setNode(node) {
+    this.node = node
+    this.id = node.peerId
+    if (this.isOwner) {
+      this.owner = this.id
     }
   }
 
