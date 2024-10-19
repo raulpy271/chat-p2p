@@ -34,6 +34,8 @@
   },
   "devDependencies": {
     "electron": "^33.0.0",
+    "electronmon": "^2.0.3",
+    "nodemon": "^3.1.7",
     "test-ipfs-example": "^1.1.0"
   },
   "private": true

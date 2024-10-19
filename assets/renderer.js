@@ -1,6 +1,8 @@
 
 const sendBtn = document.getElementById('send-btn')
 const textArea = document.getElementsByTagName('textarea')[0]
+const regexName = /^(.*?):/;
+const regexMsg = /: (.*)/;
 
 const renderer = async () => {
   const name = await chat.name()
@@ -19,8 +21,12 @@ sendBtn.addEventListener('click', async () => {
 })
 
 chat.onMsgReceived((msg) => {
+  const matchUser = msg.match(regexName);
+  const matchMsg = msg.match(regexMsg);
+  const userName = matchUser[1]
+  const message = matchMsg[1]
   const msgWindow = document.getElementsByClassName('msgs')[0]
-  msgWindow.innerHTML += `<p class="msg">${msg}</p>`
+  msgWindow.innerHTML += `<div class="received-msg"> <p class="msg-user">${userName}: </p> <p class="msg">${message}</p> </div>`
   console.log(`mensagem recebida: ${msg}`)
 })
 

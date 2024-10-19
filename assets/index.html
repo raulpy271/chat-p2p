@@ -12,27 +12,26 @@
       content="default-src 'self'; script-src 'self'"
     />
 
-    <link rel="stylesheet" href="styles.css">
-    <title>Hello from Electron renderer!</title>
+    <link rel="stylesheet" href="styles.css" />
+    <title>Chatp2p</title>
   </head>
   <body>
-    <div>
-      <h1>Hello from Electron renderer!</h1>
-      <div class="window chat">
-        <p id="user-profile">👋</p>
-        <div class="window msgs">
-        </div>
-        <div class="window input">
-          <form>
-            <textarea name="text-msg" rows="4" cols="60">Digite uma mensagem...</textarea>
-            <button id="send-btn" type="button">Enviar!</button>
-          </form>
-        </div>
+    <div class="title">Bem vindo ao ChatP2P</div>
+    <div class="window chat window-chat">
+      <div class="user-profile">
+        <p id="user-profile" class="user-name"></p>
       </div>
-      <br>
-      <div id="addrs">
+      <div class="window msgs window-msgs">
+
       </div>
-    </div>
+        <form>
+          <textarea name="text-msg" rows="4" cols="60" placeholder="Digite uma mensagem..."></textarea
+          >
+          <button id="send-btn" type="button">Enviar</button>
+        </form>
+      </div>
+    <br />
+    <div id="addrs" class="addrs"></div>
   </body>
   <script src="./renderer.js"></script>
 </html>
