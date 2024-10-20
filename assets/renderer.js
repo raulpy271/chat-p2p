@@ -24,7 +24,13 @@ const renderer = async () => {
 }
 
 sendBtn.addEventListener('click', async () => {
-  await chat.msg(textArea.value)
+  const me = await chat.me()
+  if (me.peers.length > 0) {
+    await chat.msg(textArea.value)
+  } else {
+    alert("Não há nós conectados na sala")
+  }
+  textArea.value = ""
 })
 
 chat.onMsgReceived((msg) => {
@@ -44,6 +50,22 @@ chat.onDisconnected((peer) => {
 chat.onNameDiscovered((peer) => {
   msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer entrou na sala: <span>${peer["name"]}</span></p> </div>`
   console.log(`Peer descoberto ${peer["name"]}`)
+})
+
+chat.onBanned((peer) => {
+  if (peer["name"] === name) {
+    alert("Você foi banido. Fechando chat em instantes...")
+    setTimeout(() => window.close(), 500)
+  } else {
+    msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer foi banido: <span>${peer["name"]}</span></p> </div>`
+  }
+})
+
+chat.onChatFull((peer) => {
+  if (peer["name"] === name) {
+    alert("Não há espaço no chat. Fechando chat em instantes...")
+    setTimeout(() => window.close(), 500)
+  }
 })
 
 chat.onOwnerChanged((isOwner) => {
