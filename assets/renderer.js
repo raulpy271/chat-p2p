@@ -1,5 +1,7 @@
 
 var name = null
+var inactiveTime = 0
+const MAX_INACTIVE_TIME = 3 * 60
 const sendBtn = document.getElementById('send-btn')
 const textArea = document.getElementsByTagName('textarea')[0]
 const msgWindow = document.getElementsByClassName('msgs')[0]
@@ -24,6 +26,7 @@ const renderer = async () => {
 }
 
 sendBtn.addEventListener('click', async () => {
+  inactiveTime = 0
   const me = await chat.me()
   if (me.peers.length > 0) {
     await chat.msg(textArea.value)
@@ -75,5 +78,14 @@ chat.onOwnerChanged((isOwner) => {
     user.innerText = `Olá ${name}`
   }
 })
+
+const inactiveInterval = setInterval(() => {
+  inactiveTime += 2
+  if (inactiveTime >= MAX_INACTIVE_TIME) {
+    clearInterval(inactiveInterval)
+    alert("Chat inativo. Fechando chat em instantes...")
+    setTimeout(() => window.close(), 500)
+  }
+}, 2000)
 
 renderer()
