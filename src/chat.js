@@ -4,29 +4,47 @@ import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { delay } from './utils.js'
 
 export class Chat {
-  constructor(name, node, owner) {
+  constructor(name, owner) {
     this.topic = 'chat_01'
     this.meta_topic = 'meta_topic'
     this.peers = []
     this.name = name
-    this.node = node
-    this.id = node.peerId
+    this.node = null
+    this.id = null
     this.owner = null
     this.isOwner = false
     this.events = {}
     this.nextOwner = null
     this.lenghtChat = 10
+    this.stopped = false
     if (owner) {
-      this.owner = this.id
       this.isOwner = true
+    }
+  }
+
+  setNode(node) {
+    this.node = node
+    this.id = node.peerId
+    if (this.isOwner) {
+      this.owner = this.id
     }
   }
 
   addPeer(peer) {
     this.peers.push({
       "peer": peer,
+      "name": null,
       "join_date": Date.now()
     })
+  }
+
+  findPeer(peerId) {
+    let peersFound = this.peers.filter(peer => peer['peer'].id.toString() === peerId.toString())
+    if (peersFound) {
+      return peersFound[0]
+    } else {
+      return null
+    }
   }
 
   setNextOwner() {
@@ -54,6 +72,21 @@ export class Chat {
     }
   }
 
+  async leave() {
+    this.stopped = true
+    // Disconecta de todos os nós conectados
+    for (const peer of this.peers) {
+      await this.node.hangUp(peer["peer"].id)
+    }
+    // Se houver alguma conexão aberta, fecha-a
+    for (const conn of this.node.getConnections()) {
+      if (conn.status === "open") {
+        await conn.close()
+      }
+    }
+    this.peers = []
+  }
+
   async discovery(evt) {
     const peer = evt.detail
     this.addPeer(peer)
@@ -63,28 +96,44 @@ export class Chat {
       this.owner = this.node.getPeers()[0]
     }
     console.log(`Peer ${this.node.peerId.toString()} discovered: ${peer.id.toString()}`)
+  }
+
+  // Evento disparado quando o peer foi subscrito no tópico
+  async subscribe(evt) {
+    // Delay necessário para descobrir todos os peers.
+    await delay(1000)
+    if (this.stopped) {
+      return
+    }
+    const peerId = evt.detail.peerId
+    console.log(`Peer subscrito nos tópicos: ${peerId.toString()}`)
+    let msg = `peer-name:${this.name}`
+    await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
     if (this.isOwner) {
       this.setNextOwner()
-      let msg = `set-next-owner:${this.nextOwner.toString()}`
-      await delay(1000)
+      msg = `set-next-owner:${this.nextOwner.toString()}`
       await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
-
-      if(this.peers.length>=this.lenghtChat){
+      if (this.peers.length >= this.lenghtChat) {
         console.log("Chat Cheio")
-        let msg = 'chat-full:'+peer.id
+        msg = 'chat-full:'+peerId.toString()
         await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
       }
     }
   }
 
   async disconnect(evt) {
+    if (this.stopped) {
+      return
+    }
     let ownerDisconnected = false
+    let disconnectedPeer = this.findPeer(evt.detail)
     this.removePeer(evt.detail)
     if (evt.detail.toString() === this.owner.toString()) {
       ownerDisconnected = true
       console.log("O owner saiu, definindo novo nó mais velhor como owner")
       this.promoteOwner()
       console.log(`Novo owner: ${this.owner.toString()}`)
+      this.handleEvent('owner-changed', this.isOwner)
     }
     if (this.isOwner && this.peers.length > 0) {
       if (ownerDisconnected || (evt.detail.toString() === this.nextOwner.toString())) {
@@ -94,7 +143,8 @@ export class Chat {
         await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
       }
     }
-    console.log("\n Um nó foi de base " + evt.detail.toString())
+    console.log("\n Um nó foi de base " + disconnectedPeer["name"])
+    this.handleEvent('disconnected', disconnectedPeer)
   }
 
   async message(evt) {
@@ -103,7 +153,7 @@ export class Chat {
       if (msg.startsWith('set-next-owner:')) {
         let nextOwner = msg.replace('set-next-owner:', '')
         if (this.id.toString() === nextOwner) {
-            this.nextOwner = this.id
+          this.nextOwner = this.id
         } else {
           for (let peer of this.peers) {
             if (peer['peer'].id.toString() === nextOwner) {
@@ -117,7 +167,11 @@ export class Chat {
         let bannedPeer = msg.replace('banned:', '')
         if (bannedPeer === this.id.toString()) {
           console.log('Peer banido')
-          process.exit()
+          await this.leave()
+          this.handleEvent('banned', {"name": this.name})
+        } else {
+          let peer = this.findPeer(bannedPeer)
+          this.handleEvent('banned', peer)
         }
       }
 
@@ -125,15 +179,34 @@ export class Chat {
         let bannedPeer = msg.replace('chat-full:', '')
         if (bannedPeer === this.id.toString()) {
           console.log('Chat Cheio!')
-          process.exit()
+          await this.leave()
+          this.handleEvent('chat-full', {"name": this.name})
+        } else {
+          let peer = this.findPeer(bannedPeer)
+          this.handleEvent('chat-full', peer)
         }
       }
 
       if (msg.startsWith('length-chat:')) {
         let length = parseInt(msg.replace('length-chat:', ''))
-          this.lenghtChat = length
-          console.log('Tamanho da sala alterada para '+  this.lenghtChat)
+        this.lenghtChat = length
+        console.log('Tamanho da sala alterada para '+  this.lenghtChat)
       }
+
+      if (msg.startsWith('peer-name:')) {
+        let name = msg.replace('peer-name:', '')
+        let peer = this.findPeer(evt.detail.from)
+        if (peer) {
+          if (!peer["name"]) {
+            peer["name"] = name
+            console.log(`Nome do nó ${peer["peer"].id.toString()}: ${name}`)
+            this.handleEvent('peer-name-discovered', peer)
+          }
+        } else {
+          console.log(`Peer não encontrato: ${evt.detail.from.toString()}`)
+        }
+      }
+
 
       return
     }
@@ -156,6 +229,7 @@ export class Chat {
       } else {
         console.log(`Somente Owner pode banir ${bannedPeer}`)
       }
+      return
     }
 
     if (ipt.startsWith('/length-chat ')) {
