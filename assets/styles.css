@@ -112,7 +112,6 @@ div.window-msgs {
 
 p.msg-user {
   padding-right: 10px;
-  color: #d1cece;
   font-weight: bold;
   white-space: nowrap;
 }
@@ -154,9 +153,8 @@ button {
   margin-top: 10px;
   border-radius: 20px;
   background-color: transparent;
-  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5);
+  border: 1px solid  #d1cece;
   color: #d1cece;
-  border: none;
   cursor: pointer;
   font-size: 14px;
 }
@@ -165,4 +163,24 @@ div.addrs {
   font-size: 14px;
   color: #c4c4c4;
   margin-bottom: 30px;
+}
+
+p.color-lightPink {
+  color: #f8e1f4;
+}
+
+p.color-lightBlue {
+  color: #e1f5fe;
+}
+
+p.color-lightGreen {
+  color: #e4ffc4;
+}
+
+p.color-lightYellow {
+  color: #fff9c4;
+}
+
+p.color-lightOrange {
+  color: #ffecb3;
 }
