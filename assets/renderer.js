@@ -1,5 +1,7 @@
 
 var name = null
+var inactiveTime = 0
+const MAX_INACTIVE_TIME = 3 * 60
 const sendBtn = document.getElementById('send-btn')
 const textArea = document.getElementsByTagName('textarea')[0]
 const msgWindow = document.getElementsByClassName('msgs')[0]
@@ -24,7 +26,14 @@ const renderer = async () => {
 }
 
 sendBtn.addEventListener('click', async () => {
-  await chat.msg(textArea.value)
+  inactiveTime = 0
+  const me = await chat.me()
+  if (me.peers.length > 0) {
+    await chat.msg(textArea.value)
+  } else {
+    alert("Não há nós conectados na sala")
+  }
+  textArea.value = ""
 })
 
 chat.onMsgReceived((msg) => {
@@ -46,6 +55,22 @@ chat.onNameDiscovered((peer) => {
   console.log(`Peer descoberto ${peer["name"]}`)
 })
 
+chat.onBanned((peer) => {
+  if (peer["name"] === name) {
+    alert("Você foi banido. Fechando chat em instantes...")
+    setTimeout(() => window.close(), 500)
+  } else {
+    msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer foi banido: <span>${peer["name"]}</span></p> </div>`
+  }
+})
+
+chat.onChatFull((peer) => {
+  if (peer["name"] === name) {
+    alert("Não há espaço no chat. Fechando chat em instantes...")
+    setTimeout(() => window.close(), 500)
+  }
+})
+
 chat.onOwnerChanged((isOwner) => {
   if (isOwner) {
     user.innerText = `Olá ${name} - Admin`
@@ -53,5 +78,14 @@ chat.onOwnerChanged((isOwner) => {
     user.innerText = `Olá ${name}`
   }
 })
+
+const inactiveInterval = setInterval(() => {
+  inactiveTime += 2
+  if (inactiveTime >= MAX_INACTIVE_TIME) {
+    clearInterval(inactiveInterval)
+    alert("Chat inativo. Fechando chat em instantes...")
+    setTimeout(() => window.close(), 500)
+  }
+}, 2000)
 
 renderer()

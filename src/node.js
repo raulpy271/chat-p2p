@@ -32,6 +32,7 @@ export async function runChat(chat) {
 
   node.addEventListener('peer:discovery', async (e) => await chat.discovery(e))
   node.addEventListener('peer:disconnect', async (e) => await chat.disconnect(e))
+  node.services.pubsub.addEventListener('subscription-change', async (e) => await chat.subscribe(e))
   node.services.pubsub.addEventListener('message', async (e) => await chat.message(e))
 
   node.services.pubsub.subscribe(chat.topic)

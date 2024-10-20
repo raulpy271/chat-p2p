@@ -18,7 +18,7 @@ export async function createNode(owner) {
     connectionEncrypters: [noise()],
     peerDiscovery: [
       pubsubPeerDiscovery({
-        interval: 1000
+        interval: 100
       })
     ],
     services: {

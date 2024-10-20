@@ -16,6 +16,7 @@ export class Chat {
     this.events = {}
     this.nextOwner = null
     this.lenghtChat = 10
+    this.stopped = false
     if (owner) {
       this.isOwner = true
     }
@@ -71,6 +72,21 @@ export class Chat {
     }
   }
 
+  async leave() {
+    this.stopped = true
+    // Disconecta de todos os nós conectados
+    for (const peer of this.peers) {
+      await this.node.hangUp(peer["peer"].id)
+    }
+    // Se houver alguma conexão aberta, fecha-a
+    for (const conn of this.node.getConnections()) {
+      if (conn.status === "open") {
+        await conn.close()
+      }
+    }
+    this.peers = []
+  }
+
   async discovery(evt) {
     const peer = evt.detail
     this.addPeer(peer)
@@ -80,8 +96,17 @@ export class Chat {
       this.owner = this.node.getPeers()[0]
     }
     console.log(`Peer ${this.node.peerId.toString()} discovered: ${peer.id.toString()}`)
-    // Delay necessário pois a decoberta do peer não é imediata à subscrição no tópico
+  }
+
+  // Evento disparado quando o peer foi subscrito no tópico
+  async subscribe(evt) {
+    // Delay necessário para descobrir todos os peers.
     await delay(1000)
+    if (this.stopped) {
+      return
+    }
+    const peerId = evt.detail.peerId
+    console.log(`Peer subscrito nos tópicos: ${peerId.toString()}`)
     let msg = `peer-name:${this.name}`
     await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
     if (this.isOwner) {
@@ -90,13 +115,16 @@ export class Chat {
       await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
       if (this.peers.length >= this.lenghtChat) {
         console.log("Chat Cheio")
-        msg = 'chat-full:'+peer.id
+        msg = 'chat-full:'+peerId.toString()
         await this.node.services.pubsub.publish(this.meta_topic, uint8ArrayFromString(msg))
       }
     }
   }
 
   async disconnect(evt) {
+    if (this.stopped) {
+      return
+    }
     let ownerDisconnected = false
     let disconnectedPeer = this.findPeer(evt.detail)
     this.removePeer(evt.detail)
@@ -125,7 +153,7 @@ export class Chat {
       if (msg.startsWith('set-next-owner:')) {
         let nextOwner = msg.replace('set-next-owner:', '')
         if (this.id.toString() === nextOwner) {
-            this.nextOwner = this.id
+          this.nextOwner = this.id
         } else {
           for (let peer of this.peers) {
             if (peer['peer'].id.toString() === nextOwner) {
@@ -139,7 +167,11 @@ export class Chat {
         let bannedPeer = msg.replace('banned:', '')
         if (bannedPeer === this.id.toString()) {
           console.log('Peer banido')
-          process.exit()
+          await this.leave()
+          this.handleEvent('banned', {"name": this.name})
+        } else {
+          let peer = this.findPeer(bannedPeer)
+          this.handleEvent('banned', peer)
         }
       }
 
@@ -147,7 +179,11 @@ export class Chat {
         let bannedPeer = msg.replace('chat-full:', '')
         if (bannedPeer === this.id.toString()) {
           console.log('Chat Cheio!')
-          process.exit()
+          await this.leave()
+          this.handleEvent('chat-full', {"name": this.name})
+        } else {
+          let peer = this.findPeer(bannedPeer)
+          this.handleEvent('chat-full', peer)
         }
       }
 
@@ -193,6 +229,7 @@ export class Chat {
       } else {
         console.log(`Somente Owner pode banir ${bannedPeer}`)
       }
+      return
     }
 
     if (ipt.startsWith('/length-chat ')) {
