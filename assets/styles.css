@@ -1,7 +1,7 @@
 * {
-  margin: 0; /* Remove margens */
-  padding: 0; /* Remove qualquer padding */
-  box-sizing: border-box; /* Garante que padding e borda sejam incluídos nas dimensões */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: "sans serif";
 }
 
@@ -15,16 +15,15 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow: hidden; /* Garante que o pseudo-elemento não transborde */
 }
 
 body::before {
   content: "";
   position: absolute;
-  top: -10px; /* Faz com que o fundo seja ligeiramente maior que a tela */
+  top: -10px;
   left: -10px;
-  width: calc(100vw + 20px); /* Aumenta o tamanho horizontal */
-  height: calc(100vh + 20px); /* Aumenta o tamanho vertical */
+  width: calc(100vw + 20px);
+  height: calc(100vh + 20px);
   background-image: url("./background.jpg");
   background-size: cover;
   background-position: center;
@@ -88,6 +87,11 @@ div.received-msg {
   word-break: break-all;
   white-space: normal;
 }
+
+div.send-msg{
+  justify-content: flex-end;
+
+}
 div.window-msgs::-webkit-scrollbar {
   width: 8px;
 }
@@ -123,6 +127,15 @@ p.msg {
   word-break: break-all;
   white-space: normal;
   padding: 5px 10px;
+}
+
+p.info{
+  font-size: 12px;
+  color: #929292;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 form {

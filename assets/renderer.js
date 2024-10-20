@@ -51,8 +51,13 @@ const renderer = async () => {
 sendBtn.addEventListener('click', async () => {
   inactiveTime = 0
   const me = await chat.me()
-  if (me.peers.length > 0) {
+  if (me.peers.length > 0 && textArea.value != "") {
     await chat.msg(textArea.value)
+    const userName = me.name;
+    const userColor = chooseColor(userName);
+    const message = textArea.value;
+    const msgWindow = document.getElementsByClassName("msgs")[0];
+    msgWindow.innerHTML += `<div class="received-msg send-msg"> <p class="msg-user ${userColor}">${userName}: </p> <p class="msg">${message}</p> </div>`;
   } else {
     alert("Não há nós conectados na sala")
   }
@@ -71,12 +76,12 @@ chat.onMsgReceived((msg) => {
 })
 
 chat.onDisconnected((peer) => {
-  msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer disconectado: <span>${peer["name"]}</span></p> </div>`
+  msgWindow.innerHTML += `<div class="received-msg"> <p class="info">Peer disconectado: ${peer["name"]}</p> </div>`
   console.log(`Peer disconectado ${peer["name"]}`)
 })
 
 chat.onNameDiscovered((peer) => {
-  msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer entrou na sala: <span>${peer["name"]}</span></p> </div>`
+  msgWindow.innerHTML += `<div class="received-msg"> <p class="info">Peer entrou na sala: ${peer["name"]}</p> </div>`
   console.log(`Peer descoberto ${peer["name"]}`)
 })
 
@@ -85,7 +90,7 @@ chat.onBanned((peer) => {
     alert("Você foi banido. Fechando chat em instantes...")
     setTimeout(() => window.close(), 500)
   } else {
-    msgWindow.innerHTML += `<div class="received-msg"> <p class="msg">Peer foi banido: <span>${peer["name"]}</span></p> </div>`
+    msgWindow.innerHTML += `<div class="received-msg"> <p class="info">Peer foi banido:  ${peer["name"]}</p> </div>`
   }
 })
 
