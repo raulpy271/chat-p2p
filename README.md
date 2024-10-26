@@ -4,7 +4,7 @@
 
 Este projeto implementa uma aplicação de chat Peer-to-Peer(P2P), o chat possui uma quantidade variável de usuários e possui um criador, que tem responsabilidade de administrar o chat. A rede suporta a eventual queda dos nós, inclusive a saída do criador da rede, permitindo que outro nó passe a ser o administrador.
 
-A interface gráfica do chat é implementada utlizando a biblioteca [Electron](https://www.electronjs.org/) enquantos detalhes de conexão a rede e protocolo de mensagens são estabelecidos utilizado a stack de bibliotecas do [libp2p2](https://libp2p.github.io/js-libp2p/).
+A interface gráfica do chat é implementada utlizando a biblioteca [Electron](https://www.electronjs.org/) enquantos detalhes de conexão a rede e protocolo de mensagens são estabelecidos utilizado a stack de bibliotecas do [libp2p](https://libp2p.github.io/js-libp2p/).
 
 ## Setup 
 
